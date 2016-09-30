@@ -1,0 +1,62 @@
+Hibernate
+	关联关系
+	查询
+		NativeSQL>HQL>EJBQL(JPQL1.0)>QBC(Query By Criteria)>QBE(Query By Example)
+		HQL:
+			Insert:
+				int insertedEntities = session.createQuery(
+				    "insert into Partner (id, name) " +
+				    "select p.id, p.name " +
+				    "from Person p ")
+				.executeUpdate();
+			Delete:
+				int delEntities = session.createQuery(
+					"delete from Person where name =:iname")
+				.setParameter("iname",iname)
+				.executeUpdate();
+			Update:
+				int updatedEntities = session.createQuery(
+    					"update Person " +
+    					"set name = :newName " +
+    					"where name = :oldName" )
+				.setParameter( "oldName", oldName )
+				.setParameter( "newName", newName )
+				.executeUpdate();
+			Select:
+				List<Person> persons = session.createQuery("from Person").list();
+			
+		JPQL:
+			Select:
+				List<Person> persons = entityManager.createQuery("select p from Person p", Person.class ).getResultList();
+				List<Person> persons = entityManager.createQuery(
+				    "select distinct pr1 " +
+				    "from Person pr1, Person pr2 " +
+				    "where pr1.id <> pr2.id " +
+				    "  and pr1.address = pr2.address " +
+				    "  and pr1.createdOn < pr2.createdOn", Person.class )
+				.getResultList();
+			Update:
+				int updatedEntities = entityManager.createQuery(
+				    "update Person p " +
+				    "set p.name = :newName " +
+				    "where p.name = :oldName" )
+				.setParameter( "oldName", oldName )
+				.setParameter( "newName", newName )
+				.executeUpdate();
+
+		QBC(Query By Criteria):
+			不建议使用Hibernate API，请使用JPA的API
+			Hibernate提供一个较旧的，传统的org.hibernate.Criteria API应该考虑废弃。无功能开发将针对这些API。最终，Hibernate的相关标准功能将被移植作为扩展到JPA javax.persistence.criteria.CriteriaQuery。有关org.hibernate.Criteria API的详细信息，请参阅遗留Hibernate条件查询。
+			Hibernate Criteria 不建议使用，请使用JPA的API代替
+			JPA Criteria,面向对象，类型安全。
+			例子：
+			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+			CriteriaQuery<Person> criteria = builder.createQuery( Person.class );
+			Root<Person> root = criteria.from( Person.class );
+			criteria.select( root );
+			criteria.where( builder.equal( root.get( Person_.name ), "John Doe" ) );
+			
+			List<Person> persons = entityManager.createQuery( criteria ).getResultList();
+		QBE:
+			不建议使用。
