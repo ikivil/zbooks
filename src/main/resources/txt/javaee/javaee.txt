@@ -1,0 +1,4 @@
+jdk7 javaee-api-6.0 tomcat 7 正常
+jdk8 javaee-api-7.0 tomcat 7 出现问题
+
+jdk8 javaee-api-7.0 tomcat 8 应该正常
