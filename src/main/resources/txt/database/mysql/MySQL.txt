@@ -1,0 +1,15 @@
+1.安装
+2.连接
+D:\kaywk\mysql\mysql-5.5.19-win32\bin>mysql -u root -p  	-- 连接MySQL
+Enter password: 											-- 回车建自动进入
+mysql> show databases; 										-- 查看所有库列表
+mysql> select database(); 									-- 查看当前数据库 
+mysql> use mysql; 											-- 切换至 mysql库
+mysql> create user 'ljw'@'localhost' identified by '123456';-- 创建用户及密码
+mysql> flush privileges;  									-- 使创建用户生效
+mysql> create database testdb;								-- 创建数据库或create schema testdb。
+mysql> grant all privileges on test db.* to ljw@localhost identified  by '123456'; -- ljw 在本地授权
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.1.3' IDENTIFIED BY '123456'; -- root 在指定IP授权
+mysql> flush privileges;									-- 使操作生效
+D:\kaywk\mysql\mysql-5.5.19-win32\bin>mysql -u ljw -p  		-- 使用创建的用户连接MySQL
+mysql>
