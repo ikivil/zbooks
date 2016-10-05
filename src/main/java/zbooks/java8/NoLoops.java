@@ -52,7 +52,7 @@ public class NoLoops {
 	public static void main(String[] args) {
 		NoLoops nl = new NoLoops();
 		List<Article> articles = nl.getData();
-		Article article = nl.getFirstJavaArticle(articles);//Test 1
+		//Article article = nl.getFirstJavaArticle(articles);//Test 1
 		Optional<Article> article8 =nl.getFirstJavaArticle8(articles);//Test 2
 		System.out.println(article8.get());
 	}
