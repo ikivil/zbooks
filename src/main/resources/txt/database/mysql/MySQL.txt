@@ -12,6 +12,8 @@ mysql> grant all privileges on test db.* to 'ljw'@'localhost' '; 								-- 授�
 mysql> grant all privileges on test db.* to 'ljw'@'localhost' identified  by '123456'; 			-- 授权：ljw 在本地授权并使用该密码
 mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.1.3' IDENTIFIED BY '123456'; 				-- 授权：root 在指定IP授权
 mysql> GRANT ALL PRIVILEGES ON *.* TO 'ljw'@'%'IDENTIFIED BY 'mypassword' WITH GRANT OPTION; 	-- 授权：用户在任意IP授权
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'ljw'@'%'IDENTIFIED BY 'ljw';								-- 授权：任意可能不包含本机
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'ljw'@'localhost'IDENTIFIED BY 'ljw';						-- 授权：添加本机
 mysql> flush privileges;									-- 使操作生效
 D:\kaywk\mysql\mysql-5.5.19-win32\bin>mysql -u ljw -p  		-- 使用创建的用户连接MySQL
 mysql>
