@@ -1,0 +1,57 @@
+jUnit 单元测试
+1.jUnit.jar	//jUnit环境
+2.App.class	//App类
+3.AppTest.class //测试App类的类
+
+/**
+ * 计算加法与减法
+ */
+public class App {
+	public int addInt(int a,int b){
+		return a+b;
+	}
+	public int subInt(int a,int b){
+		return a-b;
+	}
+}
+
+/**
+ * 测试类
+ * 执行结果分析
+ * 1 @BeforeClass和@AfterClass只执行一次，在所有方法开始前/后
+ * 2 @Before和@After在每个@Test标注的方法前后各执行一次
+ * 3 @Test 标注的方法都会执行一次（表示要测试的方法）
+ * 4 @Ignore方法不会被执行，没有annotation的方法也不会被执行
+ * 5 总结  @BeforeClass –> （@Before –> @Test –> @After） –> @AfterClass
+ */
+public class AppTest {
+
+	App app;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
+	@Before
+	public void setUp() throws Exception {
+		app = new App();
+	}
+
+	@Test
+	public void testAddInt() {
+		//单条件测试
+		assertEquals(3,app.addInt(1, 2));
+	}
+
+	@Test
+	public void testSubInt() {
+		assertEquals(1,app.subInt(3, 2));
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
+
+}
