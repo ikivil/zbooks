@@ -1,0 +1,38 @@
+
+日志接口
+commons-logging
+slf4j
+
+日志实现
+log4j
+log4j2
+jul(java.util.logging)
+slf4j-simple
+logback
+
+
+================================
+1.使用 slf4j,基本流程
+API			binding					 impl					建议
+slf4j-api	slf4j-log4j.jar 		 log4j
+			log4j-slf4j-impl-2.0.jar log4j2					binding由log4j2提供
+			无		 				 logback-classic		建议(默认使用slf4j的api,无需binding)
+			slf4j-jdk.jar			 jul(java.util.logging)	不建议使用
+			slf4j-jcl.jar			 jcl(commons-logging)	不建议使用
+			slf4j-simple.jar		 simple					不建议使用
+			slf4j-nop.jar			 NOP					不建议使用
+			
+2.原来使用 commons-logging,切换至 slf4j
+	1.去掉commons-logging 添加 jcl-over-slf4j
+	3.注意jcl-over-slf4j和slf4j-jcl.jar 会冲突，去掉一个，最好不要用jcl实现了在,用的很少。
+	2.参考1
+	
+3.原来使用 log4j,切换至 slf4j
+	1.去掉log4j，添加 log4j-over-slf4j
+	2.参考1
+	3.注意log4j-over-slf4j和slf4j-log4j.jar 会冲突，
+	4.解决方法：slf4j-api,slf4j-log4j,log4j,去掉log4j-over-slf4j
+			
+4.原来使用 jcl(java.util.logging),切换至 slf4j
+	1.无法去掉jcl(jdk中)，添加 jul-to-slf4j,注意名字不是over
+	2.参考1
