@@ -1,0 +1,528 @@
+=============== 待整理
+
+什么是代理模式
+为某对象提供一个代理，从而通过代理来访问这个对象。
+代理模式的角色组成
+代理模式有三种角色组成：
+抽象角色：通过接口或抽象类声明真实角色实现的业务方法。 
+代理角色：实现抽象角色，是真实角色的代理，通过真实角色的业务逻辑方法来实现抽象方法，并可以附加自己的操作。 
+真实角色：实现抽象角色，定义真实角色所要实现的业务逻辑，供代理角色调用。
+我的总结：
+抽象角色就是一个接口或抽象类，定义一些方法； 
+真实角色就是对抽象角色以及其中的方法进行实现； 
+代理角色也要实现抽象角色，并且注入真实角色，提供与真实角色同名的方法，再在代理角色的同名方法中通过注入的真实角色调用真实角色的方法。
+代理模式的作用
+高扩展性： 
+比如一个接口A中的方法需要被两个真实角色（B、C）调用，现在有新的需求，需要修改B中实现接口A的某方法m，直接修改B会影响系统的稳定性，创建代理ProxyB实现接口A，并将真实对象B注入进来。ProxyB实现接口方法m，另外还可以增加附加行为，然后调用真实对象B的m。从而达到了“对修改关闭，对扩展开放”，保证了系统的稳定性。
+职责清晰：典型的例子就是AOP的应用，在一个继承了某接口的业务类调用时，为了记录日志，创建这个业务类的代理类，并在代理类中注入这个业务类，并实现这个接口的方法，在方法中可以加入日志记录的代码，然后再通过注入的业务类调用业务类中的方法，从而实现了日志功能的添加。
+静态代理及实现
+概念：由程序员创建或工具生成代理类的源码，再编译代理类。
+实现：
+来个例子看看 
+1.抽象角色（接口）：
+package com.proxy.test;
+
+public interface UserService {
+    public void addUser();
+
+}
+
+2.真实角色（实现类）：
+package com.proxy.test;
+
+public class UserServiceImpl implements UserService{
+
+    @Override
+    public void addUser() {
+        System.out.println("增加用户中...");
+
+    }
+}
+
+3.代理角色（实现代理类）
+package com.proxy.test;
+
+public class UserServiceProxy implements UserService{
+
+          private UserService userService;
+
+          public UserServiceProxy(UserService userService){
+            this.setUserService(userService);
+          }
+
+        public UserService getUserService() {
+            return userService;
+        }
+
+        public void setUserService(UserService userService) {
+            this.userService = userService;
+        }
+
+
+
+        @Override
+        public void addUser() {
+        System.out.println("增加用户准备...");
+        userService.addUser();
+        System.out.println("增加用户结束...");            
+        }
+}
+
+
+4.运行结果：
+增加用户准备...
+增加用户中...
+增加用户结束...
+
+有没有很像日志记录功能的实现呢？
+但是静态代理也有一些缺点： 
+1.一旦接口增加一个方法后，所以实现该接口的类都要实现这个方法，当然也包括代理类，使代码维护困难。 
+2.代理对象只能服务于某一对象，如果需要代理的对象很多，则代码量很大。 
+此时我们需要动态代理。
+JDK动态代理及实现
+原理：
+Java 反射机制可以生成任意类型的动态代理类。java.lang.reflect 包下面的Proxy类和InvocationHandler 接口提供了生成动态代理类的能力。
+实践：
+1.抽象角色（创建一个接口）：
+package com.jdkproxy.test;
+
+public interface UserService {
+    public void addUser();
+}
+
+2.真实角色（实现接口）：
+package com.jdkproxy.test;
+
+import com.proxy.test.UserService;
+
+public class UserServiceImpl implements UserService{
+
+    @Override
+    public void addUser() {
+        System.out.println("增加用户中...");
+
+    }
+}
+
+3.代理角色：
+package com.jdkproxy.test;
+
+public class addLogs {
+    public void addLog(){
+        System.out.println("增加用户日志启动");
+    }
+}
+
+4.动态代理类（必须实现InvocationHandler接口）
+package com.jdkproxy.test;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+public class JDKProxy implements InvocationHandler {
+    //目标对象
+    private Object target; 
+    private addLogs logger = new addLogs();
+
+    public JDKProxy() {
+    }
+
+    public Object getTarget() {
+        return target;
+    }
+
+    public void setTarget(Object target) {
+        this.target = target;
+    }
+
+    public addLogs getLogger() {
+        return logger;
+    }
+
+    public void setLogger(addLogs logger) {
+        this.logger = logger;
+    }
+
+    public JDKProxy(Object target) {
+        this.target = target;
+    }
+
+    // 参数1 将来所产生的代理对象 Proxy
+    // 参数2 将来需要调用到的目标对象里面真正的那个方法的镜像
+    // 参数3 将来调用方法的时候所传的参数
+    public Object invoke(Object proxy, Method m, Object[] args)
+            throws Throwable {
+        // 获得将来所调用方法的名字
+        String methodName = m.getName();
+        // 用日志记录输出一下
+        System.out.println(methodName+"is invocation");
+        logger.addLog();
+        // 用反射的方式去调用将来需要真正调用的方法.
+        Object o = m.invoke(target, args);
+
+        return o;
+    }
+
+   }
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+5.测试
+package com.jdkproxy.test;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+
+import com.proxy.test.UserService;
+import com.proxy.test.UserServiceImpl;
+
+public class TestJDKProxy {
+
+    public static void main(String[] args){
+        UserService userService=new UserServiceImpl();
+
+
+
+            Class c = userService.getClass();
+            //获得目标对象的类加载器对象
+            ClassLoader classLoader = c.getClassLoader();
+
+            //获得目标对象所实现的所有接口
+            Class[] interfaces = c.getInterfaces();
+
+            //获得一个InvocationHandler接口的实现类对象,并把目标对象传进去
+            InvocationHandler h = 
+                    new JDKProxy(userService);
+
+            //参数1 目标对象的类加载器对象
+            //参数2 目标对象所实现的所有接口. Class类型数组
+            //参数3 InvocationHandler接口的实现类对象
+            UserService proxy = 
+                (UserService)Proxy.newProxyInstance
+                (classLoader, interfaces, h);
+            //这里的proxy是一个实现了IStudentService接口动态生成的代理类的对象
+            proxy.addUser();
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+6.运行结果：
+addUseris invocation
+增加用户日志启动
+增加用户中...
+1
+2
+3
+4
+7.解析： 
+我们来看下动态代理类：
+public Object invoke(Object proxy, Method m, Object[] args)
+            throws Throwable {
+        // 获得将来所调用方法的名字
+        String methodName = m.getName();
+        // 用日志记录输出一下
+        System.out.println(methodName+"is invocation");
+        logger.addLog();
+        // 用反射的方式去调用将来需要真正调用的方法.
+        Object o = m.invoke(target, args);
+
+        return o;
+    }
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+每一个动态代理类都必须要实现InvocationHandler这个接口，并且每个代理类的实例都关联到了一个handler。
+当我们通过代理对象调用一个方法的时候，这个方法的调用就会被转发为由InvocationHandler这个接口的 invoke 方法来进行调用
+public Object invoke(Object proxy, Method m, Object[] args)
+            throws Throwable {}
+1
+2
+proxy:　　指代我们所代理的那个真实对象 
+method:　　指代的是我们所要调用真实对象的某个方法的Method对象 
+args:　　指代的是调用真实对象某个方法时接受的参数 
+代码中通过反射的方法 
+Object o = m.invoke(target, args); 
+去调用真实角色的方法，在这个方法前后我们可以加入日志的记录等操作。
+测试类中：
+    public static void main(String[] args){
+        UserService userService=new UserServiceImpl();
+
+
+
+            Class c = userService.getClass();
+            //获得目标对象的类加载器对象
+            ClassLoader classLoader = c.getClassLoader();
+
+            //获得目标对象所实现的所有接口
+            Class[] interfaces = c.getInterfaces();
+
+            //获得一个InvocationHandler接口的实现类对象,并把目标对象传进去
+            InvocationHandler h = 
+                    new JDKProxy(userService);
+
+            //参数1 目标对象的类加载器对象
+            //参数2 目标对象所实现的所有接口. Class类型数组
+            //参数3 InvocationHandler接口的实现类对象
+            UserService proxy = 
+                (UserService)Proxy.newProxyInstance
+                (classLoader, interfaces, h);
+            //这里的proxy是一个实现了IStudentService接口动态生成的代理类的对象
+            proxy.addUser();
+    }
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+核心代码为：
+ UserService proxy = 
+                (UserService)Proxy.newProxyInstance
+                (classLoader, interfaces, h);
+1
+2
+3
+Proxy这个类的作用就是用来动态创建一个代理对象的类
+而Proxy的newProxyInstance便得到一个动态的代理对象，传入三个参数：
+classLoader:　　一个ClassLoader对象，定义了由哪个ClassLoader对象来对生成的代理对象进行加载
+interfaces:　　一个Interface对象的数组，表示的是我将要给我需要代理的对象提供一组什么接口，如果我提供了一组接口给它，那么这个代理对象就宣称实现了该接口(多态)，这样我就能调用这组接口中的方法了
+h:　　一个InvocationHandler对象，表示的是当我这个动态代理对象在调用方法的时候，会关联到哪一个InvocationHandler对象上
+再看这一句：
+InvocationHandler h = 
+                    new JDKProxy(userService);
+1
+2
+我们要代理哪个真实对象，就将该对象传进去，最后是通过该真实对象来调用其方法的 
+更多知识：http://www.cnblogs.com/xiaoluo501395377/p/3383130.html
+CGLIB动态代理及实现
+一个问题：
+以上的JDK代理和静态代理所代理的类都是实现了某接口的，对于没有实现接口的类，我们使用动态代理时就可以将CGLIB拿来了~
+原理：
+通过字节码技术为需要代理的目标对象创建一个子类对象，并在子类对象中拦截所有父类（即需要代理的类）方法的调用，然后在方法调用前后调用后都可以加入自己想要执行的代码。
+但因为采用的是继承，所以不能对final修饰的类和final方法进行代理。
+实现
+1、创建方法类（需要被代理的类）
+package com.cglib.test;
+
+public class RunMethod {
+    public void Run(){
+        System.out.println("执行被代理类的方法");
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+2、创建cglib代理类
+package com.cglib.test;
+
+import java.lang.reflect.Method;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+public class CglibProxy implements MethodInterceptor{
+
+    public Object getProxy(Class clazz){
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(clazz);
+        enhancer.setCallback(this);
+         return enhancer.create();
+    }
+
+    @Override
+    public Object intercept(Object arg0, Method arg1, Object[] arg2,
+            MethodProxy arg3) throws Throwable {
+        System.out.println("执行被代理类之前要做的事情");
+        Object result = arg3.invokeSuper(arg0, arg2);
+        System.out.println("执行被代理类之后要做的事情");
+
+        return result;
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+我们来看下这个代理类，首先要实现MethodInterceptor接口，并重写intercept方法。
+getProxy(Class clazz）{}方法通过传入需要代理的类RunMethod 的Class对象来创建一个RunMethod 的子类的对象。
+intercept()方法负责拦截所有需要代理的类RunMethod 中方法的调用。
+intercept方法的参数： 
+arg0：生成的代理对象。 
+arg1：需要代理的类RunMethod （父类）中方法的反射对象。 
+arg2：方法入参。 
+arg3：代理类（子类）中方法的反射对象。
+3、测试
+package com.cglib.test;
+
+public class TestCglib {
+    public static void main(String[] args){
+        CglibProxy proxy = new CglibProxy();
+          //通过生成子类的方式创建代理类
+          RunMethod proxyImp = (RunMethod)proxy.getProxy(RunMethod.class);
+          proxyImp.Run();
+    }
+}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+4、执行结果
+执行被代理类之前要做的事情
+执行被代理类的方法
+执行被代理类之后要做的事情
+1
+2
+3
+4
+附：
+1、经过测试JDK动态代理在JDK7以上的版本，速度优于CGLIB，参考：http://www.cnblogs.com/haiq/p/4304615.html
+2、动态代理是实现AOP（面向切面编程）的技术支持
+get then deeper~

@@ -1,0 +1,19 @@
+@Entity
+	实体标注
+@Table
+	表名标注
+	@Table(name="t_person")
+
+@Id
+	主键
+@GeneratedValue
+	主键生成策略
+		自增长主键
+			GenerationType.TABLE：使用一个特定的数据库表格来保存主键。 
+			GenerationType.SEQUENCE：根据底层数据库的序列来生成主键，条件是数据库支持序列。Oracle 
+			GenerationType.IDENTITY：主键由数据库自动生成（主要是自动增长型） MySQL
+			GenerationType.AUTO：主键由程序控制。
+		UUID主键
+			@GeneratedValue(generator = "system-uuid")
+			@GenericGenerator(name = "system-uuid", strategy = "uuid")
+ 
