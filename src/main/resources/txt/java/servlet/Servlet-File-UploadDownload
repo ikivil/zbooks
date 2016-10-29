@@ -1,0 +1,23 @@
+Servlet 上传下载示例：
+
+
+1.jsp
+<form action="upload" method="post" enctype="multipart/form-data">
+    <input type="text" name="description" />
+    <input type="file" name="file" />
+    <input type="submit" />
+</form>
+
+2.Servlet
+如果使用Servlet3.0 or newer 可以使用注解方式扫描Servlet
+@WebServlet("/upload")
+@MultipartConfig
+public class UploadServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	    String description = request.getParameter("description"); // Retrieves <input type="text" name="description">
+	    Part filePart = request.getPart("file"); // Retrieves <input type="file" name="file">
+	    String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // MSIE fix.
+	    InputStream is = filePart.getInputStream();
+	    // ... (do your job here)
+	}
+}
